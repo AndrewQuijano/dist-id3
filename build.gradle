@@ -1,0 +1,59 @@
+plugins {
+    id 'java'
+    id 'jacoco'
+    id 'application'
+}
+
+group = 'io.github.andrewquijano'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+dependencies {
+    // https://mvnrepository.com/artifact/nz.ac.waikato.cms.weka/weka-dev
+    implementation 'nz.ac.waikato.cms.weka:weka-dev:3.9.6'
+    // https://mvnrepository.com/artifact/commons-io/commons-io
+    implementation 'commons-io:commons-io:2.16.1'
+    testImplementation 'junit:junit:4.13.2'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+// Commenting because it doesn't work well on TravisCI
+test {
+    testLogging {
+// Make sure output from
+// standard out or error is shown
+// in Gradle output.
+        showStandardStreams = true
+    }
+}
+
+// This library was built for Java 8 so it can be imported into Android as well.
+// If you want to use a later version of Java, this should help point what to tweak.
+gradle.projectsEvaluated {
+    tasks.withType(JavaCompile).tap {
+        configureEach {
+            options.compilerArgs << "-Xlint:deprecation,unchecked"
+        }
+    }
+}
+
+jacocoTestReport {
+    reports {
+        xml.required=true
+        html.required=true
+    }
+}
+
+check.dependsOn jacocoTestReport
+
+application {
+    mainClass.set(project.findProperty("chooseRole").toString())
+}
